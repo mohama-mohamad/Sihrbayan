@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حذف الحساب — سِحر البيان</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#0E332C;color:#20321d;direction:rtl}
+  .wrap{max-width:560px;margin:0 auto;padding:24px}
+  .card{background:#FBF7EE;border:1px solid #E6D2A3;border-radius:18px;padding:24px;margin-top:20px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+  h1{color:#0E463F;font-size:22px;margin:0 0 6px} h2{color:#0E463F;font-size:17px}
+  .gold{height:3px;width:90px;background:#C9A24B;border-radius:3px;margin:10px 0 16px}
+  p,li{line-height:1.9;font-size:15px;color:#3a3a2c}
+  label{display:block;font-weight:bold;margin:14px 0 6px;color:#0E463F}
+  input,textarea{width:100%;padding:12px;border:1px solid #cdbf9a;border-radius:12px;font-size:15px;font-family:inherit}
+  button{margin-top:18px;width:100%;padding:14px;border:0;border-radius:12px;background:#0E463F;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+  button:disabled{opacity:.6}
+  .muted{color:#8a8272;font-size:13px}
+  .ok{background:#e8f5e9;border:1px solid #66bb6a;color:#1b5e20;padding:16px;border-radius:12px;line-height:1.9}
+  .err{background:#fdecea;border:1px solid #ef5350;color:#b71c1c;padding:12px;border-radius:12px}
+  .brand{color:#C9A24B;font-weight:bold;text-align:center;font-size:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">سِحر البيان</div>
+  <div class="card" id="card">
+    <h1>طلب حذف الحساب والبيانات</h1><div class="gold"></div>
+    <p>يمكنك من هنا طلب حذف حسابك وبياناتك الشخصية في تطبيق <b>سِحر البيان</b> دون الحاجة لفتح التطبيق.</p>
+    <h2>ما الذي سيُحذف؟</h2>
+    <ul>
+      <li>حسابك (البريد الإلكتروني واسم العرض).</li>
+      <li>صورة ملفك الشخصي.</li>
+      <li>تعليقاتك ومساهماتك (القصائد/الخواطر) المرتبطة بحسابك.</li>
+      <li>رموز جهازك المستخدمة للتنبيهات.</li>
+    </ul>
+    <p class="muted">تُنفَّذ الطلبات خلال مدة أقصاها 30 يوماً. المحتوى العام (كالشعر الكلاسيكي) لا يرتبط بحسابك ولا يُحذف.</p>
+    <form id="f">
+      <label>البريد الإلكتروني المسجّل *</label>
+      <input type="email" id="email" required placeholder="you@example.com">
+      <label>ملاحظة (اختياري)</label>
+      <textarea id="note" rows="3" placeholder="أي تفاصيل إضافية"></textarea>
+      <div id="msg"></div>
+      <button type="submit" id="btn">إرسال طلب الحذف</button>
+    </form>
+  </div>
+  <p class="muted" style="text-align:center;margin-top:16px">© سِحر البيان</p>
+</div>
+<script>
+  var ENDPOINT = "https://dyqcyxvnraauwnovpitr.supabase.co/functions/v1/delete-account";
+  var f = document.getElementById('f');
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = document.getElementById('email').value.trim();
+    var note = document.getElementById('note').value.trim();
+    var btn = document.getElementById('btn');
+    var msg = document.getElementById('msg');
+    msg.innerHTML = '';
+    if(!email){ return; }
+    btn.disabled = true; btn.textContent = 'جارٍ الإرسال...';
+    var body = 'email=' + encodeURIComponent(email) + '&note=' + encodeURIComponent(note);
+    fetch(ENDPOINT, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: body })
+      .then(function(r){ if(!r.ok) throw new Error(); return r.text(); })
+      .then(function(){
+        document.getElementById('card').innerHTML =
+          '<div class="ok"><b>تم استلام طلبك ✅</b><br>سنحذف حسابك وبياناتك المرتبطة به خلال مدة أقصاها 30 يوماً. سنراسلك على <b>' + email + '</b> عند الحاجة.</div>';
+      })
+      .catch(function(){
+        btn.disabled = false; btn.textContent = 'إرسال طلب الحذف';
+        msg.innerHTML = '<div class="err">تعذّر الإرسال، حاول مرة أخرى لاحقاً.</div>';
+      });
+  });
+</script>
+</body>
+</html>
